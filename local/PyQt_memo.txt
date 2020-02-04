@@ -1,0 +1,18 @@
+QtDesigner 存檔後會有一個 .ui 檔
+接下來就是把 .ui 檔轉 .py
+這時就要用 pyuic4.bat 來幫忙了 (在Python\Lib\site-packages\PyQt4裡)
+如果是PyQt5:
+pyuic5 pyqt5_client_20200130.ui -o pyqt5_client_20200130.py
+
+sip now being installed separately.
+https://github.com/pyinstaller/pyinstaller/issues/3630
+Upon creating the installer I added the line:
+
+--hidden-import PyQt5.sip
+
+This worked no problem. E.g.
+
+pyinstaller -F --noconsole qt5_10x_dilution_GUI_temp.py --hidden-import PyQt5.sip
+
+當要傳入function名稱，並且function帶有parameters時，用lambda：
+self.pushButton.clicked.connect(lambda: handle_input(self.lineEdit, self.label_4, self.label_5, self.label_6))
