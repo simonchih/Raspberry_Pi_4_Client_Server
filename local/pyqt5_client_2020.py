@@ -88,7 +88,10 @@ class Window(QtWidgets.QWidget):
         self.ui.pushButton_5.clicked.connect(lambda: self.cright())
         self.ui.pushButton_6.clicked.connect(lambda: self.cup())
         self.ui.pushButton_7.clicked.connect(lambda: self.cdown())
-        self.ui.pushButton_8.clicked.connect(lambda: self.client_send())      
+        self.ui.pushButton_8.clicked.connect(lambda: self.client_send())
+        self.ui.pushButton_9.clicked.connect(lambda: self.json_load())
+        self.ui.pushButton_10.clicked.connect(lambda:self.json_save())
+        
     def con_dis(self):
         global s
         if s:
@@ -104,6 +107,85 @@ class Window(QtWidgets.QWidget):
         
     def set_con_button(self, text):
         self.ui.pushButton.setText(text)
+    
+    def keyPressEvent(self, qKeyEvent):
+        if qKeyEvent.key() == QtCore.Qt.Key_Return: 
+            #print('Enter pressed')
+            self.client_send()
+    
+    def json_load(self):
+        global s
+        word = "load_json"
+        
+        slot = self.slot_value(self.ui)
+        
+        word = word + " " + str(slot)
+        
+        if not s:
+            self.thcon.start()
+            time.sleep(s_delay_time)
+        
+        self.send_cmd(word)
+    
+    def json_save(self):
+        global s
+        word = "save_json"
+        
+        slot = self.slot_value(self.ui)
+        
+        word = word + " " + str(slot)
+        
+        if not s:
+            self.thcon.start()
+            time.sleep(s_delay_time)
+        
+        self.send_cmd(word)
+    
+    def slot_value(self, ui):
+        slot = 1
+        
+        if ui.radioButton_9.isChecked():
+            slot = 1
+        elif ui.radioButton_10.isChecked():
+            slot = 2
+        elif ui.radioButton_11.isChecked():
+            slot = 3
+        elif ui.radioButton_12.isChecked():
+            slot = 4
+        elif ui.radioButton_13.isChecked():
+            slot = 5
+        elif ui.radioButton_14.isChecked():
+            slot = 6
+        elif ui.radioButton_15.isChecked():
+            slot = 7
+        elif ui.radioButton_16.isChecked():
+            slot = 8
+        elif ui.radioButton_17.isChecked():
+            slot = 9
+        elif ui.radioButton_18.isChecked():
+            slot = 10
+        elif ui.radioButton_19.isChecked():
+            slot = 11
+        elif ui.radioButton_20.isChecked():
+            slot = 12
+        elif ui.radioButton_21.isChecked():
+            slot = 13
+        elif ui.radioButton_22.isChecked():
+            slot = 14
+        elif ui.radioButton_23.isChecked():
+            slot = 15
+        elif ui.radioButton_24.isChecked():
+            slot = 16
+        elif ui.radioButton_25.isChecked():
+            slot = 17
+        elif ui.radioButton_26.isChecked():
+            slot = 18
+        elif ui.radioButton_27.isChecked():
+            slot = 19
+        elif ui.radioButton_28.isChecked():
+            slot = 20
+            
+        return slot
     
     def send_cmd(self, word):
         self.th.word = word

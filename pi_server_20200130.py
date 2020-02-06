@@ -5,11 +5,33 @@ import time
 # import thread module 
 from _thread import *
 import threading
+import json
 
 end_server = False 
 client = None
 addr = None
 s = None
+
+def save_json(slot):
+    path = 'slot/%d.json' % slot
+    
+    try:
+        data = load_json(slot)
+    except Exception as e:
+        data = {}
+        
+    data['slot'] = slot
+    
+    with open(path, 'w') as outfile:
+        json.dump(data, outfile)
+
+def load_json(slot):
+    path = 'slot/%d.json' % slot
+    
+    with open(path) as json_file:
+        data = json.load(json_file)
+        
+    return data
 
 # blinking function
 def blink(pin = 7):
