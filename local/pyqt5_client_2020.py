@@ -4,6 +4,8 @@ import socket
 import time
 
 s = None
+# socket delay time (seconds)
+s_delay_time = 0.15
 
 class Thread_con(QtCore.QThread):
     def __init__(self, window, thsc):
@@ -13,7 +15,6 @@ class Thread_con(QtCore.QThread):
         
     def run(self):
         global s
-        # local host IP '127.0.0.1' 
         #host = '192.168.1.177'
         host = self.ui.lineEdit.text()
     
@@ -24,7 +25,7 @@ class Thread_con(QtCore.QThread):
         try:
             s = socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
     
-            # connect to server on local computer 
+            # connect to server
             s.connect((host,port))
     
             self.thsc.response_label.emit("Connect to " + host + " is successful!")
@@ -91,9 +92,8 @@ class Window(QtWidgets.QWidget):
     def con_dis(self):
         global s
         if s:
-            self.th.word = "dis"
-            self.th.start()
-            time.sleep(0.1)
+            self.send_cmd("dis")
+            time.sleep(s_delay_time)
             s = None
             self.th.con_button.emit("Connect")
         else:
@@ -111,10 +111,9 @@ class Window(QtWidgets.QWidget):
     
     def client_send(self): 
         global s
-        word = self.ui.lineEdit_3.text()
         
-        self.th.word = word
-        self.th.start()
+        word = self.ui.lineEdit_3.text()
+        self.send_cmd(word)
     
     def radio_value(self, ui):
         v = 0.1
@@ -155,7 +154,7 @@ class Window(QtWidgets.QWidget):
         
         if not s:
             self.thcon.start()
-            time.sleep(0.1)
+            time.sleep(s_delay_time)
         
         # handle both connected and disconnected
         self.send_cmd(word)
@@ -170,7 +169,7 @@ class Window(QtWidgets.QWidget):
         
         if not s:
             self.thcon.start()
-            time.sleep(0.1)
+            time.sleep(s_delay_time)
         
         # handle both connected and disconnected
         self.send_cmd(word)       
@@ -185,7 +184,7 @@ class Window(QtWidgets.QWidget):
         
         if not s:
             self.thcon.start()
-            time.sleep(0.1)
+            time.sleep(s_delay_time)
         
         # handle both connected and disconnected
         self.send_cmd(word)
@@ -200,7 +199,7 @@ class Window(QtWidgets.QWidget):
         
         if not s:
             self.thcon.start()
-            time.sleep(0.1)
+            time.sleep(s_delay_time)
         
         # handle both connected and disconnected
         self.send_cmd(word)
@@ -216,7 +215,7 @@ class Window(QtWidgets.QWidget):
         
         if not s:
             self.thcon.start()
-            time.sleep(0.1)
+            time.sleep(s_delay_time)
         
         # handle both connected and disconnected
         self.send_cmd(word)
@@ -232,7 +231,7 @@ class Window(QtWidgets.QWidget):
         
         if not s:
             self.thcon.start()
-            time.sleep(0.1)
+            time.sleep(s_delay_time)
         
         # handle both connected and disconnected
         self.send_cmd(word)
