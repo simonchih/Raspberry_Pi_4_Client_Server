@@ -1,0 +1,3 @@
+sudo systemctl enable pis
+
+Ref: https://raspberrypi.stackexchange.com/questions/54416/running-a-command-on-pi-boot-after-ip-is-assigned

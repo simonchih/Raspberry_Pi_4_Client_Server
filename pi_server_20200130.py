@@ -7,13 +7,18 @@ from _thread import *
 import threading
 import json
 
+# Control sc400 if needed
+import sc400
+
 end_server = False 
 client = None
 addr = None
 s = None
 
+working_dict = "/home/pi"
+
 def save_json(slot):
-    path = 'slot/%d.json' % slot
+    path = '%s/slot/%d.json' % (working_dict, slot)
     
     try:
         data = load_json(slot)
@@ -26,8 +31,7 @@ def save_json(slot):
         json.dump(data, outfile)
 
 def load_json(slot):
-    path = 'slot/%d.json' % slot
-    
+    path = '%s/slot/%d.json' % (working_dict, slot)
     with open(path) as json_file:
         data = json.load(json_file)
         
