@@ -74,6 +74,8 @@ class Thread_send_cmd(QtCore.QThread):
 class Window(QtWidgets.QWidget):
     def __init__(self):
         QtWidgets.QWidget.__init__(self)
+        self.show_items = False
+        
         self.ui = Ui_Form()
         self.ui.setupUi(self)
         self.th = Thread_send_cmd(self)
@@ -91,6 +93,7 @@ class Window(QtWidgets.QWidget):
         self.ui.pushButton_8.clicked.connect(lambda: self.client_send())
         self.ui.pushButton_9.clicked.connect(lambda: self.json_load())
         self.ui.pushButton_10.clicked.connect(lambda:self.json_save())
+        self.ui.listWidget.clicked.connect(lambda: self.show_list())
         
     def con_dis(self):
         global s
@@ -113,6 +116,19 @@ class Window(QtWidgets.QWidget):
             #print('Enter pressed')
             self.client_send()
     
+    def show_list(self):
+        if False == self.show_items: # show
+            self.ui.listWidget.setGeometry(QtCore.QRect(110, 100, 221, 151))
+            self.show_items = True
+        else: # hide
+            self.ui.listWidget.setGeometry(QtCore.QRect(110, 100, 221, 21))
+            self.show_items = False
+            
+        if "Other" == self.ui.listWidget.currentItem().text():
+            self.ui.lineEdit_4.setEnabled(True)
+        else:
+            self.ui.lineEdit_4.setEnabled(False)
+    
     def json_load(self):
         global s
         word = "load_json"
@@ -133,7 +149,12 @@ class Window(QtWidgets.QWidget):
         
         slot = self.slot_value(self.ui)
         
-        word = word + " " + str(slot)
+        if "Other" == self.ui.listWidget.currentItem().text():
+            item_text = "'%s'" % self.ui.lineEdit_4.text().strip()
+        else:
+            item_text = "'%s'" % self.ui.listWidget.currentItem().text().strip()
+        
+        word = word + " " + str(slot) + " " + item_text
         
         if not s:
             self.thcon.start()

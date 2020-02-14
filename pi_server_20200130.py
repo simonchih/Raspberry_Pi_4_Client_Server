@@ -17,7 +17,7 @@ s = None
 
 working_dict = "/home/pi"
 
-def save_json(slot):
+def save_json(slot, item_text):
     path = '%s/slot/%d.json' % (working_dict, slot)
     
     try:
@@ -26,6 +26,7 @@ def save_json(slot):
         data = {}
         
     data['slot'] = slot
+    data[item_text] = {"A1": [0, 0, 0]}
     
     with open(path, 'w') as outfile:
         json.dump(data, outfile)
