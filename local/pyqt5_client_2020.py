@@ -150,7 +150,7 @@ class Window(QtWidgets.QWidget):
         slot = self.slot_value(self.ui)
         
         if not self.ui.listWidget.currentItem():
-            self.ui.label_5.setText("Current Item is None")
+            self.ui.label_5.setText("Current item of Labware is None")
             return
         
         if "Other" == self.ui.listWidget.currentItem().text():
