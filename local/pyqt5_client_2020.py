@@ -149,6 +149,10 @@ class Window(QtWidgets.QWidget):
         
         slot = self.slot_value(self.ui)
         
+        if not self.ui.listWidget.currentItem():
+            self.ui.label_5.setText("Current Item is None")
+            return
+        
         if "Other" == self.ui.listWidget.currentItem().text():
             item_text = "'%s'" % self.ui.lineEdit_4.text().strip()
         else:

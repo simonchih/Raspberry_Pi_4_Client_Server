@@ -215,7 +215,7 @@ class Ui_Form(object):
         self.radioButton_30.setObjectName("radioButton_30")
 
         self.retranslateUi(Form)
-        self.listWidget.setCurrentRow(-1)
+        self.listWidget.setCurrentRow(0)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
     def retranslateUi(self, Form):
