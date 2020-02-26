@@ -10,13 +10,32 @@ import json
 # Control sc400 if needed
 import sc400
 
+import thread_run
+
 end_server = False 
 client = None
 addr = None
 s = None
 
 working_dict = "/home/pi"
+protocol_name = "protocol.py"
 
+th_protocol = None
+
+def runp():
+    if 0 == thread_run.run_status:
+        th_protocol.run()
+
+def susp():
+    thread_run.run_status = 2
+    #Con = threading.Condition()
+    #Con.wait()
+    
+def resume():
+    thread_run.run_status = 1
+    #Con = threading.Condition()
+    #Con.notify()
+                    
 def save_json(slot, item_text):
     path = '%s/slot/%d.json' % (working_dict, slot)
     
@@ -83,11 +102,17 @@ def end():
 
 def dis():
     print('Bye')
-    
+
+def trans_file():
+    print("200 OK Trans File")
+
 # thread fuction 
 def threaded(c):   
     global s
+    global th_protocol
     
+    th_protocol = thread_run.run_protocol(c)
+        
     while(True):
         try:
             # data received from client 
@@ -100,7 +125,7 @@ def threaded(c):
         
             alen = len(resp)
             cmd_func = cmd + '('
-            
+
             for i in range(1, alen):
                 if i == alen - 1: #last
                     cmd_func += resp[i]
@@ -108,11 +133,8 @@ def threaded(c):
                     cmd_func += resp[i] + ','
                     
             cmd_func += ')'
-            eval(cmd_func)
-                
-            # send back reversed string to client 
-            c.send(data)
-            print(data)
+            eval(cmd_func)  
+            
             
             if 'end' == resp[0]:
                 c.close()
@@ -122,6 +144,27 @@ def threaded(c):
             elif 'dis' == resp[0]:                
                 c.close()
                 break
+            elif 'trans_file' == resp[0]:
+                c.send("200 OK Trans File".encode('utf-8'))
+                with open('%s/%s' % (working_dict, protocol_name), 'wb') as f:
+                    print('file opened')
+                    while True:
+                        #print('receiving data...')
+                        data = c.recv(1024)
+                        #print('data=%s', (data))
+                        if not data:
+                            break
+                        # write data to a file
+                        f.write(data)
+                
+                f.close()
+                print('Successfully get the file')
+                c.close()
+                print('connection closed')
+            else:
+                # send back reversed string to client 
+                c.send(data)
+                print(data)
                 
         except Exception as e:
             print(e)
@@ -137,6 +180,7 @@ def threaded(c):
 def main():
     global client
     global s
+    
     host = ""
      
     # reverse a port on your computer 
@@ -152,7 +196,7 @@ def main():
   
     # put the socket into listening mode 
     s.listen(5) 
-    print("socket is listening") 
+    print("socket is listening")
   
     #start_new_thread(thread_accept, (s, ))
     # a forever loop until client wants to exit 

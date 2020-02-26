@@ -1,11 +1,124 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqt5_client_20200130 import Ui_Form
+import dialog
 import socket
 import time
 
 s = None
+s_file = None
 # socket delay time (seconds)
 s_delay_time = 0.15
+# 0 : NOT run, 1: run process, 2: suspend run
+runs = 0
+
+class Thread_run_protocol(QtCore.QThread):
+    response_label = QtCore.pyqtSignal(str)
+    run_button = QtCore.pyqtSignal(str)
+    btn_enable = QtCore.pyqtSignal(bool)
+    
+    def __init__(self, window, thcon):
+        super().__init__(window)
+        self.ui = window.ui
+        self.thcon = thcon
+        
+    def run(self):
+        global s
+        global runs
+        
+        word = "runp"
+        
+        if not s:
+            self.thcon.start()
+            time.sleep(s_delay_time)
+        
+        s.send(word.encode('utf-8'))
+        self.run_button.emit("Suspend")
+        runs = 1
+        
+        while True:
+            data = s.recv(1024)
+            dec = data.decode('utf-8')
+            print(dec)
+        
+            if dec.strip() == "200 OK Finished Run":
+                self.run_button.emit("Run")
+                self.btn_enable.emit(True)
+                runs = 0
+                break
+                
+    def suspend(self):
+        global runs
+        word = "susp"
+        
+        if not s:
+            self.thcon.start()
+            time.sleep(s_delay_time)
+        
+        s.send(word.encode('utf-8'))        
+        runs = 2
+        self.run_button.emit("Resume")
+        
+    def resume(self):
+        global runs
+        word = "resume"
+        
+        if not s:
+            self.thcon.start()
+            time.sleep(s_delay_time)
+        
+        s.send(word.encode('utf-8'))  
+        runs = 1
+        self.run_button.emit("Suspend")
+
+class Thread_trans_file(QtCore.QThread):
+    response_label = QtCore.pyqtSignal(str)
+
+    def __init__(self, window):
+        super().__init__(window)
+        self.ui = window.ui
+        
+    def run(self):
+        global s_file
+        #host = '192.168.1.177'
+        host = self.ui.lineEdit.text()
+    
+        # Define the port on which you want to connect 
+        #port = 12356
+        port = int(self.ui.lineEdit_2.text())
+    
+        try:
+            s_file = socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
+    
+            # connect to server
+            s_file.connect((host,port))
+    
+            self.response_label.emit("File thread connect to " + host + " is successful!")
+            
+            word = "trans_file"
+            s_file.send(word.encode('utf-8'))
+            
+            data = s_file.recv(1024)
+            dec = data.decode('utf-8')
+            print(dec)
+            
+            if dec.strip() == "200 OK Trans File": 
+                f = open(dialog.file_loc,'rb')
+                l = f.read(1024)
+                print("Prepare for file upload")
+                self.response_label.emit("Prepare for file upload")
+                while (l):
+                    s_file.send(l)
+                    #print('Sent ',repr(l))
+                    l = f.read(1024)
+                f.close()
+            print('Done sending')
+            s_file.close()
+            
+            self.response_label.emit("Finished file upload")
+            
+        except Exception as e:
+            s_file = None
+            self.response_label.emit(str(e))
 
 class Thread_con(QtCore.QThread):
     def __init__(self, window, thsc):
@@ -76,12 +189,22 @@ class Window(QtWidgets.QWidget):
         QtWidgets.QWidget.__init__(self)
         self.show_items = False
         
+        self.dialog = dialog.App()
+        
         self.ui = Ui_Form()
         self.ui.setupUi(self)
         self.th = Thread_send_cmd(self)
         self.th.response_label.connect(self.set_rsp_label)
         self.th.con_button.connect(self.set_con_button)        
         self.thcon = Thread_con(self, self.th)
+                
+        self.th_tfile = Thread_trans_file(self)
+        self.th_tfile.response_label.connect(self.set_rsp_label)       
+        
+        self.th_run = Thread_run_protocol(self, self.thcon)
+        self.th_run.response_label.connect(self.set_rsp_label)
+        self.th_run.run_button.connect(self.set_run_button)
+        self.th_run.btn_enable.connect(self.set_enable_button)
         
         self.ui.pushButton.clicked.connect(lambda: self.con_dis())
         self.ui.pushButton_2.clicked.connect(lambda: self.cback())
@@ -93,8 +216,21 @@ class Window(QtWidgets.QWidget):
         self.ui.pushButton_8.clicked.connect(lambda: self.client_send())
         self.ui.pushButton_9.clicked.connect(lambda: self.json_load())
         self.ui.pushButton_10.clicked.connect(lambda:self.json_save())
+        self.ui.pushButton_11.clicked.connect(lambda:self.get_file_loc())
+        self.ui.pushButton_12.clicked.connect(lambda:self.th_tfile.start())
+        self.ui.pushButton_13.clicked.connect(lambda:self.suspend_resume_run())
         self.ui.listWidget.clicked.connect(lambda: self.show_list())
-        
+    
+    def suspend_resume_run(self):
+        if 0 == runs:
+            self.th_run.start()  
+            self.ui.pushButton_13.setEnabled(False)
+            
+        #elif 1 == runs: #running
+        #    self.th_run.suspend()
+        #elif 2 == runs: #suspend
+        #    self.th_run.resume()
+    
     def con_dis(self):
         global s
         if s:
@@ -110,11 +246,26 @@ class Window(QtWidgets.QWidget):
         
     def set_con_button(self, text):
         self.ui.pushButton.setText(text)
+        
+    def set_run_button(self, text):
+        self.ui.pushButton_13.setText(text)
+        
+    def set_enable_button(self, b):
+        self.ui.pushButton_13.setEnabled(b)
     
     def keyPressEvent(self, qKeyEvent):
         if qKeyEvent.key() == QtCore.Qt.Key_Return: 
             #print('Enter pressed')
             self.client_send()
+    
+    def get_file_loc(self):
+        dialog.App.openFileNameDialog(self.dialog)
+        self.ui.label_8.setText(dialog.file_loc)
+        
+        if dialog.file_loc:
+            self.ui.pushButton_12.setEnabled(True)
+        else:
+            self.ui.pushButton_12.setEnabled(False)
     
     def show_list(self):
         if False == self.show_items: # show
