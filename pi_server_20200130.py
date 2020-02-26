@@ -10,7 +10,7 @@ import json
 # Control sc400 if needed
 import sc400
 
-import thread_run
+import process_run
 
 end_server = False 
 client = None
@@ -23,16 +23,16 @@ protocol_name = "protocol.py"
 th_protocol = None
 
 def runp():
-    if 0 == thread_run.run_status:
+    if 0 == process_run.run_status:
         th_protocol.run()
 
 def susp():
-    thread_run.run_status = 2
+    process_run.run_status = 2
     #Con = threading.Condition()
     #Con.wait()
     
 def resume():
-    thread_run.run_status = 1
+    process_run.run_status = 1
     #Con = threading.Condition()
     #Con.notify()
                     
@@ -111,7 +111,7 @@ def threaded(c):
     global s
     global th_protocol
     
-    th_protocol = thread_run.run_protocol(c)
+    th_protocol = process_run.run_protocol(c)
         
     while(True):
         try:
