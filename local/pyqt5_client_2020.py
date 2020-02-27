@@ -14,7 +14,7 @@ runs = 0
 class Thread_run_protocol(QtCore.QThread):
     response_label = QtCore.pyqtSignal(str)
     run_button = QtCore.pyqtSignal(str)
-    btn_enable = QtCore.pyqtSignal(bool)
+    cancel_btn = QtCore.pyqtSignal(bool)
     
     def __init__(self, window, thcon):
         super().__init__(window)
@@ -33,6 +33,7 @@ class Thread_run_protocol(QtCore.QThread):
         
         s.send(word.encode('utf-8'))
         self.run_button.emit("Suspend")
+        self.cancel_btn.emit(True)
         runs = 1
         
         while True:
@@ -42,7 +43,7 @@ class Thread_run_protocol(QtCore.QThread):
         
             if dec.strip() == "200 OK Finished Run":
                 self.run_button.emit("Run")
-                self.btn_enable.emit(True)
+                self.cancel_btn.emit(False)
                 runs = 0
                 break
                 
@@ -69,6 +70,19 @@ class Thread_run_protocol(QtCore.QThread):
         s.send(word.encode('utf-8'))  
         runs = 1
         self.run_button.emit("Suspend")
+        
+    def cancel(self):
+        global runs
+        word = "cancel"
+        
+        if not s:
+            self.thcon.start()
+            time.sleep(s_delay_time)
+        
+        s.send(word.encode('utf-8'))  
+        runs = 0
+        self.run_button.emit("Run")
+        self.cancel_btn.emit(False)
 
 class Thread_trans_file(QtCore.QThread):
     response_label = QtCore.pyqtSignal(str)
@@ -204,7 +218,7 @@ class Window(QtWidgets.QWidget):
         self.th_run = Thread_run_protocol(self, self.thcon)
         self.th_run.response_label.connect(self.set_rsp_label)
         self.th_run.run_button.connect(self.set_run_button)
-        self.th_run.btn_enable.connect(self.set_enable_button)
+        self.th_run.cancel_btn.connect(self.set_enable_button)
         
         self.ui.pushButton.clicked.connect(lambda: self.con_dis())
         self.ui.pushButton_2.clicked.connect(lambda: self.cback())
@@ -219,17 +233,16 @@ class Window(QtWidgets.QWidget):
         self.ui.pushButton_11.clicked.connect(lambda:self.get_file_loc())
         self.ui.pushButton_12.clicked.connect(lambda:self.th_tfile.start())
         self.ui.pushButton_13.clicked.connect(lambda:self.suspend_resume_run())
+        self.ui.pushButton_14.clicked.connect(lambda:self.th_run.cancel())
         self.ui.listWidget.clicked.connect(lambda: self.show_list())
     
     def suspend_resume_run(self):
         if 0 == runs:
-            self.th_run.start()  
-            self.ui.pushButton_13.setEnabled(False)
-            
-        #elif 1 == runs: #running
-        #    self.th_run.suspend()
-        #elif 2 == runs: #suspend
-        #    self.th_run.resume()
+            self.th_run.start()         
+        elif 1 == runs: #running
+            self.th_run.suspend()
+        elif 2 == runs: #suspend
+            self.th_run.resume()
     
     def con_dis(self):
         global s
@@ -251,7 +264,7 @@ class Window(QtWidgets.QWidget):
         self.ui.pushButton_13.setText(text)
         
     def set_enable_button(self, b):
-        self.ui.pushButton_13.setEnabled(b)
+        self.ui.pushButton_14.setEnabled(b)
     
     def keyPressEvent(self, qKeyEvent):
         if qKeyEvent.key() == QtCore.Qt.Key_Return: 

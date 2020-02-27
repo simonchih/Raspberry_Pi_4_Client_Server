@@ -20,21 +20,22 @@ s = None
 working_dict = "/home/pi"
 protocol_name = "protocol.py"
 
-th_protocol = None
+proc_protocol = None
 
 def runp():
-    if 0 == process_run.run_status:
-        th_protocol.run()
+    print("Start to Run Protocol")
 
 def susp():
-    process_run.run_status = 2
-    #Con = threading.Condition()
-    #Con.wait()
+    proc_protocol.susp()
+    print("Protocol Suspend")
     
 def resume():
-    process_run.run_status = 1
-    #Con = threading.Condition()
-    #Con.notify()
+    proc_protocol.resu()
+    print("Protocol Resume")
+    
+def cancel():
+    proc_protocol.cancel()
+    print("Cancel Protocol")
                     
 def save_json(slot, item_text):
     path = '%s/slot/%d.json' % (working_dict, slot)
@@ -109,9 +110,7 @@ def trans_file():
 # thread fuction 
 def threaded(c):   
     global s
-    global th_protocol
-    
-    th_protocol = process_run.run_protocol(c)
+    global proc_protocol
         
     while(True):
         try:
@@ -159,8 +158,10 @@ def threaded(c):
                 
                 f.close()
                 print('Successfully get the file')
-                c.close()
-                print('connection closed')
+            elif 'runp' == resp[0]:
+                proc_protocol = process_run.run_protocol(c)
+                proc_protocol.start()
+                c.send("runp".encode('utf-8'))
             else:
                 # send back reversed string to client 
                 c.send(data)
