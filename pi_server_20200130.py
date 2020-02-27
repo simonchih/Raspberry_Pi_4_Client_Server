@@ -111,7 +111,7 @@ def trans_file():
 def threaded(c):   
     global s
     global proc_protocol
-        
+                
     while(True):
         try:
             # data received from client 

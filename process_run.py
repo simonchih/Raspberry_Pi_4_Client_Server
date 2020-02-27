@@ -25,11 +25,11 @@ class run_protocol(threading.Thread):
             self.ps = psutil.Process(self.p.pid)
             self.p.join()
             if run_status != 0:
-                if self.c:
-                    self.c.send("200 OK Finished Run".encode('utf-8'))
-                    run_status = 0    
-                else:
+                try:
+                    self.c.send("200 OK Finished Run".encode('utf-8'))    
+                except:
                     print("Can't response the protocol is finished run")
+                run_status = 0
             
     def susp(self):
         global run_status
