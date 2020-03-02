@@ -315,7 +315,7 @@ class Ui_Form(object):
         self.radioButton_29.setText(_translate("Form", "No"))
         self.radioButton_30.setText(_translate("Form", "Yes"))
         self.pushButton_11.setText(_translate("Form", "Select"))
-        self.pushButton_12.setText(_translate("Form", "Send"))
+        self.pushButton_12.setText(_translate("Form", "Upload"))
         self.label_8.setText(_translate("Form", "file://"))
         self.pushButton_13.setText(_translate("Form", "Run"))
         self.pushButton_14.setText(_translate("Form", "Cancel"))

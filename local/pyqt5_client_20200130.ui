@@ -841,7 +841,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Send</string>
+    <string>Upload</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_8">
