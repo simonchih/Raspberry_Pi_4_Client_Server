@@ -33,38 +33,15 @@ class Thread_run_protocol(QtCore.QThread):
             time.sleep(s_delay_time)
         
         try:
-            s.send(word.encode('utf-8'))
-            self.run_button.emit("Suspend")
-            self.cancel_btn.emit(True)
-            runs = 1        
+            if 0 == runs:
+                s.send(word.encode('utf-8'))
+                self.run_button.emit("Suspend")
+                self.cancel_btn.emit(True)
+                runs = 1        
         except Exception as e:
             s = None
             self.response_label.emit(str(e))
-        
-        while runs != 0:
-            
-            if not s:
-                break
-            
-            data = s.recv(1024)
-            dec = data.decode('utf-8')
-            print(dec)
-        
-            if dec.strip() == "200 OK Finished Run":
-                self.run_button.emit("Run")
-                self.cancel_btn.emit(False)
-                runs = 0
-                break
-            elif dec.strip() == "200 OK Terminate Run":
-                data = s.recv(1024)
-                dec = data.decode('utf-8')
-                print(dec) # print b'cancel
-                
-                self.run_button.emit("Run")
-                self.cancel_btn.emit(False)
-                runs = 0
-                break
-                
+                       
     def suspend(self):
         global runs
         word = "susp"
@@ -129,10 +106,6 @@ class Thread_trans_file(QtCore.QThread):
             word = "trans_file"
             s_file.send(word.encode('utf-8'))
             
-            data = s_file.recv(1024)
-            dec = data.decode('utf-8')
-            print(dec)
-            
             if dec.strip() == "200 OK Trans File": 
                 f = open(dialog.file_loc,'rb')
                 l = f.read(1024)
@@ -187,7 +160,6 @@ class Thread_send_cmd(QtCore.QThread):
 
     def __init__(self, window):
         super().__init__(window)
-        self.window = window
         self.ui = window.ui
         self.word = ""
     
@@ -202,20 +174,8 @@ class Thread_send_cmd(QtCore.QThread):
                     print(self.word)
                     #sent_wd = [x.strip() for x in self.word.split(' ')]
                     
-                    timeout = 0.5
-                    while True:
-                        ready = select.select([s], [], [], timeout)
-                        if ready[0]:
-                            data = s.recv(1024)
-                            print(data)
-                            self.response_label.emit(str(data))
                             
-                            if 0 == len(data):
-                                break
-                        else:
-                            break
-                            
-                        #resp = [x.strip() for x in data.decode('utf-8').split(' ')]
+                    #resp = [x.strip() for x in data.decode('utf-8').split(' ')]
                                             
                 except Exception as e:
                     s = None
@@ -226,6 +186,47 @@ class Thread_send_cmd(QtCore.QThread):
         else:
             self.response_label.emit("NULL!!!")
 
+class Thread_recv(QtCore.QThread):
+    response_label = QtCore.pyqtSignal(str)
+    con_button = QtCore.pyqtSignal(str)
+    run_button = QtCore.pyqtSignal(str)
+    cancel_btn = QtCore.pyqtSignal(bool)
+    
+    def __init__(self, window):
+        super().__init__(window)
+        self.ui = window.ui
+        
+    # receive cmd
+    def run(self):
+        global s
+        global runs
+      
+        while True:
+            if s:
+                try:                                
+                    data = s.recv(1024)
+                    dec = data.decode('utf-8')
+                    if len(dec) > 0:
+                        print(dec)
+                        self.response_label.emit(str(dec))
+
+                    if dec.strip() == "200 OK Finished Run":
+                        self.run_button.emit("Run")
+                        self.cancel_btn.emit(False)
+                        runs = 0
+                    elif dec.strip() == "200 OK Terminate Run":                       
+                        self.run_button.emit("Run")
+                        self.cancel_btn.emit(False)
+                        runs = 0
+                        
+                except Exception as e:
+                    s = None
+                    self.response_label.emit(str(e))
+                    self.con_button.emit("Connect")
+                    
+            time.sleep(0.5)
+            #self.response_label.emit("Disconnected, can not receive command!")
+
 class Window(QtWidgets.QWidget):
     def __init__(self):
         QtWidgets.QWidget.__init__(self)
@@ -235,6 +236,13 @@ class Window(QtWidgets.QWidget):
         
         self.ui = Ui_Form()
         self.ui.setupUi(self)
+        
+        self.th_recv = Thread_recv(self)
+        self.th_recv.response_label.connect(self.set_rsp_label)
+        self.th_recv.con_button.connect(self.set_con_button)
+        self.th_recv.run_button.connect(self.set_run_button)
+        self.th_recv.cancel_btn.connect(self.set_enable_button)
+        
         self.th = Thread_send_cmd(self)
         self.th.response_label.connect(self.set_rsp_label)
         self.th.con_button.connect(self.set_con_button)        
@@ -263,6 +271,9 @@ class Window(QtWidgets.QWidget):
         self.ui.pushButton_13.clicked.connect(lambda:self.suspend_resume_run())
         self.ui.pushButton_14.clicked.connect(lambda:self.th_run.cancel())
         self.ui.listWidget.clicked.connect(lambda: self.show_list())
+        
+        # ini start
+        self.th_recv.start()
     
     def suspend_resume_run(self):
         global runs
