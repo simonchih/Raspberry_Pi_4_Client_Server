@@ -12,6 +12,8 @@ s_delay_time = 0.15
 # 0 : NOT run, 1: run process, 2: suspend run
 runs = 0
 
+send_file_done = 0
+
 class Thread_run_protocol(QtCore.QThread):
     response_label = QtCore.pyqtSignal(str)
     run_button = QtCore.pyqtSignal(str)
@@ -105,6 +107,10 @@ class Thread_trans_file(QtCore.QThread):
             
             word = "trans_file"
             s_file.send(word.encode('utf-8'))
+            
+            data = s_file.recv(1024)
+            dec = data.decode('utf-8')
+            print(dec)
             
             if dec.strip() == "200 OK Trans File": 
                 f = open(dialog.file_loc,'rb')
@@ -200,6 +206,7 @@ class Thread_recv(QtCore.QThread):
     def run(self):
         global s
         global runs
+        global send_file_done
       
         while True:
             if s:
@@ -218,6 +225,20 @@ class Thread_recv(QtCore.QThread):
                         self.run_button.emit("Run")
                         self.cancel_btn.emit(False)
                         runs = 0
+                    elif dec.strip() == "200 OK Trans File":
+                        print('bf', dialog.file_loc) #temp                    
+                        f = open(dialog.file_loc,'rb')
+                        print('af') #temp
+                        l = f.read(1024)
+                        print("Prepare for file upload")
+                        self.response_label.emit("Prepare for file upload")
+                        while (l):
+                            s_file.send(l)
+                            #print('Sent ',repr(l))
+                            l = f.read(1024)
+                        f.close()
+                        
+                        send_file_done = 1
                         
                 except Exception as e:
                     s = None
