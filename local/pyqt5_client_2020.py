@@ -208,12 +208,15 @@ class Thread_send_cmd(QtCore.QThread):
                         if ready[0]:
                             data = s.recv(1024)
                             print(data)
+                            
+                            if 0 == len(data):
+                                break
                         else:
                             break
                             
-                    #resp = [x.strip() for x in data.decode('utf-8').split(' ')]
+                        #resp = [x.strip() for x in data.decode('utf-8').split(' ')]
                     
-                    self.response_label.emit(str(data))
+                        self.response_label.emit(str(data))
                 except Exception as e:
                     s = None
                     self.response_label.emit(str(e))

@@ -24,6 +24,7 @@ class run_protocol(threading.Thread):
             self.p.start()
             self.ps = psutil.Process(self.p.pid)
             self.p.join()
+            #print('After join') #suspend won't finish join()
             run_status = 0
             try:
                 self.c.send("200 OK Finished Run".encode('utf-8'))    
