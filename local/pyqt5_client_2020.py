@@ -31,12 +31,16 @@ class Thread_run_protocol(QtCore.QThread):
             self.thcon.start()
             time.sleep(s_delay_time)
         
-        s.send(word.encode('utf-8'))
-        self.run_button.emit("Suspend")
-        self.cancel_btn.emit(True)
-        runs = 1
+        try:
+            s.send(word.encode('utf-8'))
+            self.run_button.emit("Suspend")
+            self.cancel_btn.emit(True)
+            runs = 1        
+        except Exception as e:
+            s = None
+            self.response_label.emit(str(e))
         
-        while True:
+        while runs != 0:
             
             if not s:
                 break
@@ -46,6 +50,11 @@ class Thread_run_protocol(QtCore.QThread):
             print(dec)
         
             if dec.strip() == "200 OK Finished Run":
+                self.run_button.emit("Run")
+                self.cancel_btn.emit(False)
+                runs = 0
+                break
+            elif dec.strip() == "200 OK Terminate Run":
                 self.run_button.emit("Run")
                 self.cancel_btn.emit(False)
                 runs = 0
@@ -241,8 +250,12 @@ class Window(QtWidgets.QWidget):
         self.ui.listWidget.clicked.connect(lambda: self.show_list())
     
     def suspend_resume_run(self):
+        global runs
+        
+        print('runs =',runs)
+    
         if 0 == runs:
-            self.th_run.start()         
+            self.th_run.start()       
         elif 1 == runs: #running
             self.th_run.suspend()
         elif 2 == runs: #suspend

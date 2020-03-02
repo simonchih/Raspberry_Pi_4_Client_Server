@@ -56,6 +56,6 @@ class run_protocol(threading.Thread):
             self.ps.terminate()
             run_status = 0
             if self.c:
-                self.c.send("Terminate protocol running".encode('utf-8'))  
+                self.c.send("200 OK Terminate Run".encode('utf-8'))  
             else:
                 print("Can't response the protocol is terminated")
