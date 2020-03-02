@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqt5_client_20200130 import Ui_Form
 import dialog
+import select
 import socket
 import time
 
@@ -55,6 +56,10 @@ class Thread_run_protocol(QtCore.QThread):
                 runs = 0
                 break
             elif dec.strip() == "200 OK Terminate Run":
+                data = s.recv(1024)
+                dec = data.decode('utf-8')
+                print(dec) # print b'cancel
+                
                 self.run_button.emit("Run")
                 self.cancel_btn.emit(False)
                 runs = 0
@@ -197,8 +202,15 @@ class Thread_send_cmd(QtCore.QThread):
                     print(self.word)
                     #sent_wd = [x.strip() for x in self.word.split(' ')]
                     
-                    data = s.recv(1024)
-                    print(data)
+                    timeout = 0.5
+                    while True:
+                        ready = select.select([s], [], [], timeout)
+                        if ready[0]:
+                            data = s.recv(1024)
+                            print(data)
+                        else:
+                            break
+                            
                     #resp = [x.strip() for x in data.decode('utf-8').split(' ')]
                     
                     self.response_label.emit(str(data))
