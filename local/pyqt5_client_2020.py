@@ -37,6 +37,10 @@ class Thread_run_protocol(QtCore.QThread):
         runs = 1
         
         while True:
+            
+            if not s:
+                break
+            
             data = s.recv(1024)
             dec = data.decode('utf-8')
             print(dec)
@@ -282,10 +286,10 @@ class Window(QtWidgets.QWidget):
     
     def show_list(self):
         if False == self.show_items: # show
-            self.ui.listWidget.setGeometry(QtCore.QRect(110, 100, 221, 151))
+            self.ui.listWidget.setGeometry(QtCore.QRect(110, 180, 221, 151))
             self.show_items = True
         else: # hide
-            self.ui.listWidget.setGeometry(QtCore.QRect(110, 100, 221, 21))
+            self.ui.listWidget.setGeometry(QtCore.QRect(110, 180, 221, 21))
             self.show_items = False
             
         if "Other" == self.ui.listWidget.currentItem().text():
@@ -312,6 +316,7 @@ class Window(QtWidgets.QWidget):
         word = "save_json"
         
         slot = self.slot_value(self.ui)
+        mount = self.pipette_mount(self.ui)
         
         if not self.ui.listWidget.currentItem():
             self.ui.label_5.setText("Current item of Labware is None")
@@ -322,7 +327,7 @@ class Window(QtWidgets.QWidget):
         else:
             item_text = "'%s'" % self.ui.listWidget.currentItem().text().strip()
         
-        word = word + " " + str(slot) + " " + item_text
+        word = word + " " + str(slot) + " " + item_text + " " + mount
         
         if not s:
             self.thcon.start()

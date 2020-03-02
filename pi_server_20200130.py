@@ -23,7 +23,7 @@ protocol_name = "protocol.py"
 proc_protocol = None
 
 def runp():
-    print("Start to Run Protocol")
+    print("Try to Run Protocol")
 
 def susp():
     proc_protocol.susp()
@@ -37,19 +37,30 @@ def cancel():
     proc_protocol.cancel()
     print("Cancel Protocol")
                     
-def save_json(slot, item_text):
+def save_json(slot, item_text, mount = "a"):
     path = '%s/slot/%d.json' % (working_dict, slot)
+    
+    xyz = [0, 0, 0] #x, y, z position
     
     try:
         data = load_json(slot)
     except Exception as e:
         data = {}
-        
-    data['slot'] = slot
-    data[item_text] = {"A1": [0, 0, 0]}
     
-    with open(path, 'w') as outfile:
-        json.dump(data, outfile)
+    data['slot'] = slot
+    try:
+        if "a" == mount:
+            data[item_text].update({mount:{"A1": xyz}})
+        elif "b" == mount:
+            data[item_text].update({mount:{"A1": xyz}})
+    except:
+        data.update({item_text:{mount:{"A1": xyz}}})
+        
+    try:
+        with open(path, 'w') as outfile:
+            json.dump(data, outfile)
+    except Exception as e:
+        print(e)
 
 def load_json(slot):
     path = '%s/slot/%d.json' % (working_dict, slot)
@@ -132,8 +143,7 @@ def threaded(c):
                     cmd_func += resp[i] + ','
                     
             cmd_func += ')'
-            eval(cmd_func)  
-            
+            eval(cmd_func)            
             
             if 'end' == resp[0]:
                 c.close()
