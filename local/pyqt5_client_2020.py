@@ -285,11 +285,16 @@ class Window(QtWidgets.QWidget):
             self.ui.pushButton_12.setEnabled(False)
     
     def show_list(self):
+        rect = self.ui.listWidget.geometry()
+        (x, y, w, h) = rect.x(), rect.y(), rect.width(), rect.height()
+        
         if False == self.show_items: # show
-            self.ui.listWidget.setGeometry(QtCore.QRect(110, 180, 221, 151))
+            h += 130
+            self.ui.listWidget.setGeometry(QtCore.QRect(x, y, w, h))
             self.show_items = True
         else: # hide
-            self.ui.listWidget.setGeometry(QtCore.QRect(110, 180, 221, 21))
+            h -= 130
+            self.ui.listWidget.setGeometry(QtCore.QRect(x, y, w, h))
             self.show_items = False
             
         if "Other" == self.ui.listWidget.currentItem().text():
