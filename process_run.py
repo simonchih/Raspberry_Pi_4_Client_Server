@@ -54,7 +54,8 @@ class run_protocol(threading.Thread):
         global run_status
         
         if self.ps:
-            self.ps.terminate()
+            #self.ps.terminate() #run,susp,cancel,dis,back ==> error
+            self.ps.kill()
             run_status = 0
             if self.c:
                 self.c.send("200 OK Terminate Run".encode('utf-8'))  
