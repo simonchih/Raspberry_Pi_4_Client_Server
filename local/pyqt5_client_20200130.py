@@ -231,6 +231,9 @@ class Ui_Form(object):
         self.pushButton_14.setEnabled(False)
         self.pushButton_14.setGeometry(QtCore.QRect(230, 510, 93, 28))
         self.pushButton_14.setObjectName("pushButton_14")
+        self.pushButton_15 = QtWidgets.QPushButton(Form)
+        self.pushButton_15.setGeometry(QtCore.QRect(640, 220, 93, 28))
+        self.pushButton_15.setObjectName("pushButton_15")
 
         self.retranslateUi(Form)
         self.listWidget.setCurrentRow(0)
@@ -319,3 +322,4 @@ class Ui_Form(object):
         self.label_8.setText(_translate("Form", "file://"))
         self.pushButton_13.setText(_translate("Form", "Run"))
         self.pushButton_14.setText(_translate("Form", "Cancel"))
+        self.pushButton_15.setText(_translate("Form", "Home"))

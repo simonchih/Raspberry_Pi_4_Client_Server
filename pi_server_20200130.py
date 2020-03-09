@@ -11,6 +11,7 @@ import json
 import sc400
 
 import process_run
+import stepmotor
 
 end_server = False 
 client = None
@@ -36,6 +37,12 @@ def resume():
 def cancel():
     proc_protocol.cancel()
     print("Cancel Protocol")
+
+def home():
+    
+    stepmotor.x = stepmotor.y = stepmotor.z_a = stepmotor.z_b = 0
+    
+    print("Go Zero. (x, y, z_a, z_b) = (%f, %f, %f, %f)" % (stepmotor.x, stepmotor.y, stepmotor.z_a, stepmotor.z_b))
                     
 def save_json(slot, item_text, mount = "a"):
     path = '%s/slot/%d.json' % (working_dict, slot)
@@ -86,22 +93,40 @@ def blink(pin = 7):
     return
 
 def left(value = 0.1):
-    print("Left %f" % float(value))
+    
+    stepmotor.left(value)
+    
+    print("Left %f, (x, y, z_a, z_b) = (%f, %f, %f, %f)" % (float(value), stepmotor.x, stepmotor.y, stepmotor.z_a, stepmotor.z_b))
     
 def right(value = 0.1):
-    print("Right %f" % float(value))
+    
+    stepmotor.right(value)
+    
+    print("Right %f, (x, y, z_a, z_b) = (%f, %f, %f, %f)" % (float(value), stepmotor.x, stepmotor.y, stepmotor.z_a, stepmotor.z_b))
     
 def forward(value = 0.1):
-    print("Forward %f" % float(value))
+    
+    stepmotor.forward(value)
+    
+    print("Forward %f, (x, y, z_a, z_b) = (%f, %f, %f, %f)" % (float(value), stepmotor.x, stepmotor.y, stepmotor.z_a, stepmotor.z_b))
     
 def back(value = 0.1):
-    print("Back %f" % float(value))
+    
+    stepmotor.back(value)
+    
+    print("Back %f, (x, y, z_a, z_b) = (%f, %f, %f, %f)" % (float(value), stepmotor.x, stepmotor.y, stepmotor.z_a, stepmotor.z_b))
     
 def up(mount, value = 0.1):
-    print("Pipette " + str(mount) + " Up %f" % float(value))
+    
+    stepmotor.up(mount, value)
+
+    print("Pipette " + str(mount) + " Up %f, (x, y, z_a, z_b) = (%f, %f, %f, %f)" % (float(value), stepmotor.x, stepmotor.y, stepmotor.z_a, stepmotor.z_b))
     
 def down(mount, value = 0.1):
-    print("Pipette " + str(mount) + " Down %f" % float(value))
+    
+    stepmotor.down(mount, value)
+
+    print("Pipette " + str(mount) + " Down %f, (x, y, z_a, z_b) = (%f, %f, %f, %f)" % (float(value), stepmotor.x, stepmotor.y, stepmotor.z_a, stepmotor.z_b))
 
 def end():
     global end_server

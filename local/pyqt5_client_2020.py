@@ -274,6 +274,7 @@ class Window(QtWidgets.QWidget):
         self.ui.pushButton_12.clicked.connect(lambda:self.th_tfile.start())
         self.ui.pushButton_13.clicked.connect(lambda:self.suspend_resume_run())
         self.ui.pushButton_14.clicked.connect(lambda:self.th_run.cancel())
+        self.ui.pushButton_15.clicked.connect(lambda:self.chome())
         self.ui.listWidget.clicked.connect(lambda: self.show_list())
         
         # ini start
@@ -467,6 +468,15 @@ class Window(QtWidgets.QWidget):
             
         return m
     
+    def chome(self):
+        global s
+        word = "home"
+        
+        if not s:
+            self.thcon.start()
+            time.sleep(s_delay_time)
+        
+        self.send_cmd(word)
     
     def cleft(self): 
         global s
