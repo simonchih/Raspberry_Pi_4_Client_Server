@@ -23,7 +23,8 @@ class motor_move(threading.Thread):
         #self.m.release()
         
         for _ in range(self.tenv):
-            self.m.onestep(direction=self.f)
+            #self.m.onestep(direction=self.f)
+            self.m.onestep(direction=self.f, style=stepper.DOUBLE)
             time.sleep(0.01)
 
 def left(value = 0.1):
