@@ -174,7 +174,6 @@ class Ui_Form(object):
         self.listWidget.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
         self.listWidget.setAutoScroll(True)
         self.listWidget.setEditTriggers(QtWidgets.QAbstractItemView.CurrentChanged|QtWidgets.QAbstractItemView.DoubleClicked|QtWidgets.QAbstractItemView.EditKeyPressed|QtWidgets.QAbstractItemView.SelectedClicked)
-        self.listWidget.setUniformItemSizes(True)
         self.listWidget.setObjectName("listWidget")
         item = QtWidgets.QListWidgetItem()
         self.listWidget.addItem(item)

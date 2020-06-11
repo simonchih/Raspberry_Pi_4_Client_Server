@@ -690,9 +690,6 @@
    <property name="editTriggers">
     <set>QAbstractItemView::CurrentChanged|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
    </property>
-   <property name="uniformItemSizes">
-    <bool>true</bool>
-   </property>
    <property name="currentRow">
     <number>0</number>
    </property>
